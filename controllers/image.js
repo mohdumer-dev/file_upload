@@ -15,7 +15,7 @@ export const LocalImage = async function (req, res) {
         }
     });
 
-    res.json("file uploaded");
+    res.status(200).json({status:true,message:"File Uploaded"});
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: false, message: "Server Down" });
