@@ -4,8 +4,9 @@ const router=Router()
 
 
 // controllers
-import { LocalImage } from "../controllers/image.js";
+import { LocalImage, UploadCloud } from "../controllers/image.js";
 
-router.post('/upload',LocalImage)
+router.post('/localFile',LocalImage)
+router.post('/cloudImage',UploadCloud)
 
 export default router

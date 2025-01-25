@@ -25,7 +25,7 @@ ConnectDb();
 
 // routes
 import router from "./routes/FileUpload.js";
-app.use("/api/v1", router);
+app.use("/api/v1/upload", router);
 
 // port
 app.listen(process.env.PORT || 5000, () => {
