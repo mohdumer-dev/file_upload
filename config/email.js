@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer'
+import env from 'dotenv'
+env.config()
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service:process.env.MAIL_SERVICE ,
   auth: {
-    user: "venturevilla.in@gmail.com", // Your Gmail address
-    pass: "qmpltgsxoflstjea",         // Your app password
+    user:process.env.MAIL_ID , // Your Gmail address
+    pass:process.env.MAIL_PASS,         // Your app password
   },
   tls: {
     rejectUnauthorized: false, // Accept self-signed certificates
@@ -18,8 +20,8 @@ const mailOption = (email, link) => ({
   },
   to: email, 
   subject: "Your cloud Link",
-  text: `Your =Cloud is below `,
-  html: `<b> Your cloud Link is here vist it  <a href="${link}">${link}</a> </b>
+  text: `Your Cloud is below `,
+  html: `<b> Your cloud Link is here vist it <br>  ${link} </b>
   `,
 });
 
