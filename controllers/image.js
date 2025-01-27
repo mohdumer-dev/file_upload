@@ -1,13 +1,16 @@
 import UserModel from "../models/user.js";
 import { v2 as cloudinary } from "cloudinary";
 
-function uploadFileCloudianry(file, folder) {
+function uploadFileCloudianry(file, folder,quality) {
   const options = {
     use_filename: true,
     unique_filename: false,
     resource_type: "auto",
     asset_folder: folder,
   };
+  if(quality){
+    options.quality=quality
+  }
   return cloudinary.uploader.upload(file.tempFilePath, options);
 }
 
@@ -101,7 +104,6 @@ export const UploadVideo = async (req, res) => {
     // data fetch
     const { username } = req.body;
     const video = req.files.video;
-    console.log(video);
 
     // validation
     const SupportedFileType = ["mp4"];
@@ -113,6 +115,31 @@ export const UploadVideo = async (req, res) => {
     }
     // uploading to cloudinary & getting back the data
     const data = await uploadFileCloudianry(video, "video_data");
+
+    res.json({ data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, message: "Server Down" });
+  }
+};
+
+export const reducerVideo = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const video = req.files.video;
+
+    // validation
+    const SupportedFileType = ["mp4"];
+    const VideoFileType = video.name.split(".")[1];
+    // validation for file type as well as video size
+    const response = isSupported(SupportedFileType, VideoFileType);
+    if (!response.valid) {
+      return res.status(422).json({ messgae: `${response.reason}` });
+    }
+    
+    // uploading to cloudinary & getting back the data
+    // reducing the image size by decreasing the width and length
+    const data = await uploadFileCloudianry(video, "video_data",70);
 
     res.json({ data });
   } catch (err) {
