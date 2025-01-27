@@ -1,15 +1,16 @@
 import UserModel from "../models/user.js";
 import { v2 as cloudinary } from "cloudinary";
 
-function uploadFileCloudianry(file, folder,quality) {
+// cloudinary , options
+function uploadFileCloudianry(file, folder, quality) {
   const options = {
     use_filename: true,
     unique_filename: false,
     resource_type: "auto",
     asset_folder: folder,
   };
-  if(quality){
-    options.quality=quality
+  if (quality) {
+    options.quality = quality;
   }
   return cloudinary.uploader.upload(file.tempFilePath, options);
 }
@@ -62,7 +63,7 @@ export const LocalImage = async function (req, res) {
 export const UploadCloud = async (req, res) => {
   try {
     // fetch the data
-    const { username } = req.body;
+    const { username,email} = req.body;
     const image = req.files.file;
 
     //  validation
@@ -75,27 +76,34 @@ export const UploadCloud = async (req, res) => {
     // sendingv back to the cloudinary and getting the response back
     const data = await uploadFileCloudianry(image, "backend-data");
 
-    const UpdateIamge = await UserModel.findOneAndUpdate(
-      { username },
-      { $push: { imageUrl: data.secure_url } },
-      { new: true }
-    );
+    // const UpdateIamge = await UserModel.findOneAndUpdate(
+    //   { username },
+    //   { $push: { imageUrl: data.secure_url } },
+    //   { new: true }
+    // );
+    
+    // Used .save() in order for post function to work out
 
-    if (!UpdateIamge) {
-      const User = await UserModel.create(
-        {
-          username,
-          imageUrl: data.secure_url,
-        },
-        { new: true }
-      );
+    let ExistingUser = await UserModel.findOne({ username });
+
+    if (ExistingUser) {
+      ExistingUser.imageUrl.push(data.secure_url);
+      await ExistingUser.save();
+    } else {
+      const User = new UserModel({
+        username,
+        email,
+        imageUrl: data.secure_url,
+      });
+      await User.save();
+
       return res.json({ User });
     }
 
-    res.json({ UpdateIamge });
+    res.json({ ExistingUser });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ status: false, message: "Server Down" });
+    res.status(500).json({ status: false, message: "Server Down 00--00" });
   }
 };
 
@@ -136,10 +144,10 @@ export const reducerVideo = async (req, res) => {
     if (!response.valid) {
       return res.status(422).json({ messgae: `${response.reason}` });
     }
-    
+
     // uploading to cloudinary & getting back the data
     // reducing the image size by decreasing the width and length
-    const data = await uploadFileCloudianry(video, "video_data",70);
+    const data = await uploadFileCloudianry(video, "video_data", 70);
 
     res.json({ data });
   } catch (err) {
