@@ -12,8 +12,12 @@ const UserSchema = new Schema({
 
 // post / pre middleware only works in .save()
 UserSchema.post("save", async (doc) => {
+
   try {
-    sendMail(doc.email,doc.imageUrl)
+    const data=doc.imageUrl.map((x)=>{
+      return `<a href="${x}">${x}</a> <br>`
+    })
+    sendMail(doc.email,data.toString())
     console.log("doc saving here", doc);
   } catch (err) {
     console.error(err);
